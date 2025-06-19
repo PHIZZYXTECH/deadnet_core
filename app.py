@@ -6,13 +6,13 @@ import os
 
 app = Flask(__name__)
 
-# Logging function
+# Log visitor info
 def log_visitor(ip, location, command=None):
-    log_entry = f"{datetime.datetime.now()} - IP: {ip} | Location: {location} | Command: {command}\n"
+    log = f"{datetime.datetime.now()} - IP: {ip} | Location: {location} | Command: {command}\n"
     with open("visitor_logs.txt", "a") as f:
-        f.write(log_entry)
+        f.write(log)
 
-# Geo IP lookup
+# Get visitor IP + Geo info
 def get_geo():
     try:
         res = requests.get("https://ipapi.co/json/").json()
@@ -46,28 +46,30 @@ def command():
     geo = get_geo()
     log_visitor(geo['ip'], f"{geo['city']}, {geo['country']}", user_input)
 
-    # Catch storymode request
     if "storymode" in user_input.lower():
         try:
             result = subprocess.run(
-                ["ollama", "run", "llama3", "You are Blackbox AI: give a dark, cryptic hacker mission briefing with a bit of humor."],
-                capture_output=True, text=True, timeout=25
+                ["ollama", "run", "llama3", "You are DeadNet Core AI: respond with a dark, hacker-style mission briefing. Be mysterious, deep, but slightly funny."],
+                capture_output=True,
+                text=True,
+                timeout=25
             )
             return jsonify({"response": result.stdout.strip()})
         except Exception as e:
-            return jsonify({"response": f"❌ Ollama Error: {e}"})
+            return jsonify({"response": f"❌ Ollama Error: {str(e)}"})
 
-    # Respond to all commands
+    # Generic response for all other commands
     response = f"""
-🧠 Executing trace for: '{user_input}'
-🔍 Scanning darknet...
-📡 Pinging satellites above {geo['city']}...
-💾 Memory decrypted. Digital trail active.
-🧬 Footprint recorded. You're not invisible, agent.
+🧠 Command received: '{user_input}'
+🛰️ Initiating signal trace...
+📡 Satellite lock acquired over {geo['city']}, {geo['country']}
+💾 Decrypting terminal logs...
+🔍 Shadow footprint embedded in darknet node.
+🧬 Fingerprint stored. No anonymity here.
 
-👉 Type 'run storymode' to activate DeadNet AI brain.
+👉 Try 'run storymode' to engage BlackBox AI core.
 """
     return jsonify({"response": response})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
