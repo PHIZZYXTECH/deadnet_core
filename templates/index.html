@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DeadNet Core</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/static/js/script.js" defer></script>
+</head>
+<body>
+  <div id="boot-screen">
+    <h1 class="title">☠️ DEADNET CORE ☠️</h1>
+    <img src="/static/img/skull.png" alt="DeadNet Skull" class="skull" />
+    <div class="boot-text" id="boot-text">
+      <p>🔍 Accessing classified terminal system...</p>
+      <p>🧠 Brain sync with BlackBox AI</p>
+      <p>📡 IP Address Detected: <strong>{{ geo.ip }}</strong></p>
+      <p>🌍 Location: <strong>{{ geo.city }}, {{ geo.region }}, {{ geo.country }}</strong></p>
+      <p>📍 Coords: <strong>{{ geo.lat }}, {{ geo.lon }}</strong></p>
+      <p>💀 Scanning browser & hardware signatures...</p>
+      <p>🛰️ Tracing signal via satellite nodes...</p>
+      <p>🔥 Injecting modules into darknet cache...</p>
+      <p>🧬 Tracking digital DNA...</p>
+      <p>☠️ Finalizing breach...</p>
+      <p class="final-line">Launching DeadNet Core...</p>
+    </div>
+  </div>
+
+  <div id="terminal-container" style="display: none;">
+    <div id="map-container">
+      <iframe width="100%" height="250" frameborder="0" style="border:0"
+        src="https://maps.google.com/maps?q={{ geo.lat }},{{ geo.lon }}&hl=en&z=13&output=embed">
+      </iframe>
+    </div>
+    <div id="terminal-output"></div>
+    <form id="terminal-form">
+      <span class="terminal-prompt">root@deadnet:~$</span>
+      <input type="text" id="terminal-input" autocomplete="off" autofocus />
+    </form>
+  </div>
+</body>
+</html>
