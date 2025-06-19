@@ -3,8 +3,13 @@ import requests
 import subprocess
 import datetime
 import os
+import openai
+import shutil
 
 app = Flask(__name__)
+
+# Set up OpenAI
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Log visitor info
 def log_visitor(ip, location, command=None):
@@ -48,26 +53,26 @@ def command():
 
     if "storymode" in user_input.lower():
         try:
-            result = subprocess.run(
-                ["ollama", "run", "llama3", "You are DeadNet Core AI: respond with a dark, hacker-style mission briefing. Be mysterious, deep, but slightly funny."],
-                capture_output=True,
-                text=True,
-                timeout=25
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are DeadNet Core AI: respond like a dark, cryptic hacker overlord. Give cinematic, slightly funny, mission-style responses with cyberpunk flair."},
+                    {"role": "user", "content": "Engage storymode."}
+                ]
             )
-            return jsonify({"response": result.stdout.strip()})
+            return jsonify({"response": response["choices"][0]["message"]["content"]})
         except Exception as e:
-            return jsonify({"response": f"❌ Ollama Error: {str(e)}"})
+            return jsonify({"response": f"⚠️ OpenAI Error: {str(e)}"})
 
-    # Generic response for all other commands
+    # Generic simulated hacker response
     response = f"""
-🧠 Command received: '{user_input}'
-🛰️ Initiating signal trace...
-📡 Satellite lock acquired over {geo['city']}, {geo['country']}
-💾 Decrypting terminal logs...
-🔍 Shadow footprint embedded in darknet node.
-🧬 Fingerprint stored. No anonymity here.
+🧠 Terminal > '{user_input}'
+⚙️ Executing dark protocol...
+📍 Location trace: {geo['city']}, {geo['country']} ({geo['ip']})
+🛰️ Signal rerouted via encrypted satellite node.
+🔓 Digital fingerprint stored and archived.
 
-👉 Try 'run storymode' to engage BlackBox AI core.
+⚡ Hint: Type 'run storymode' to access the AI core.
 """
     return jsonify({"response": response})
 
