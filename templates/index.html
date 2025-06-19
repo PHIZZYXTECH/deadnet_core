@@ -1,42 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>DeadNet Core</title>
-  <link rel="stylesheet" href="/static/css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="/static/js/script.js" defer></script>
+  <style>
+    body {
+      background-color: black;
+      color: lime;
+      font-family: 'Courier New', monospace;
+      padding: 30px;
+      text-align: center;
+    }
+    .trace {
+      animation: blink 1s infinite;
+      font-size: 18px;
+    }
+    @keyframes blink {
+      0% { opacity: 0.2; }
+      50% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
+    .headline {
+      font-size: 40px;
+      font-weight: bold;
+      color: red;
+      margin-bottom: 20px;
+    }
+    .terminal-box {
+      margin-top: 40px;
+      padding: 20px;
+      border: 2px solid lime;
+      background-color: #111;
+      font-size: 18px;
+      height: 400px;
+      overflow-y: auto;
+    }
+    .input-box {
+      margin-top: 20px;
+    }
+    input {
+      background: black;
+      color: lime;
+      font-family: monospace;
+      font-size: 18px;
+      border: 1px solid lime;
+      padding: 10px;
+      width: 70%;
+    }
+  </style>
 </head>
 <body>
-  <div id="boot-screen">
-    <h1 class="title">☠️ DEADNET CORE ☠️</h1>
-    <img src="/static/img/skull.png" alt="DeadNet Skull" class="skull" />
-    <div class="boot-text" id="boot-text">
-      <p>🔍 Accessing classified terminal system...</p>
-      <p>🧠 Brain sync with BlackBox AI</p>
-      <p>📡 IP Address Detected: <strong>{{ geo.ip }}</strong></p>
-      <p>🌍 Location: <strong>{{ geo.city }}, {{ geo.region }}, {{ geo.country }}</strong></p>
-      <p>📍 Coords: <strong>{{ geo.lat }}, {{ geo.lon }}</strong></p>
-      <p>💀 Scanning browser & hardware signatures...</p>
-      <p>🛰️ Tracing signal via satellite nodes...</p>
-      <p>🔥 Injecting modules into darknet cache...</p>
-      <p>🧬 Tracking digital DNA...</p>
-      <p>☠️ Finalizing breach...</p>
-      <p class="final-line">Launching DeadNet Core...</p>
-    </div>
+  <div class="headline">💀 DEADNET CORE V1.0 💀</div>
+
+  <div class="trace">
+    🔍 Scanning IP... <br>
+    🌍 Fetching Geolocation... <br>
+    📡 Connecting to DeadNet Mainframe...
   </div>
 
-  <div id="terminal-container" style="display: none;">
-    <div id="map-container">
-      <iframe width="100%" height="250" frameborder="0" style="border:0"
-        src="https://maps.google.com/maps?q={{ geo.lat }},{{ geo.lon }}&hl=en&z=13&output=embed">
-      </iframe>
-    </div>
-    <div id="terminal-output"></div>
-    <form id="terminal-form">
-      <span class="terminal-prompt">root@deadnet:~$</span>
-      <input type="text" id="terminal-input" autocomplete="off" autofocus />
-    </form>
+  <div class="terminal-box" id="output"></div>
+
+  <div class="input-box">
+    <input type="text" id="command" placeholder="Enter terminal command..." onkeydown="runCommand(event)">
   </div>
+
+  <script>
+    function runCommand(e) {
+      if (e.key === "Enter") {
+        const cmd = document.getElementById("command").value;
+        document.getElementById("output").innerHTML += `<div>> ${cmd}</div>`;
+
+        fetch("/get_response", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ user_input: cmd })
+        })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("output").innerHTML += `<div>${data.response}</div>`;
+          document.getElementById("command").value = "";
+          document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+        });
+      }
+    }
+  </script>
 </body>
 </html>

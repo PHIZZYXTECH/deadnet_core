@@ -5,23 +5,24 @@ import random
 
 app = Flask(__name__)
 
-# Set your OpenAI key from environment variable
+# Set OpenAI key from environment
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Send safe geo to template
+    return render_template('index.html', geo={})
 
 @app.route('/get_response', methods=['POST'])
 def get_response():
     user_input = request.json.get('user_input')
 
     try:
-        # AI responds to every command
+        # Send all commands to GPT
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are DeadNet Core: a scary, cinematic hacker AI with a sarcastic edge. Respond to all input with mystery, dark energy, and hacker-like warnings or briefings. Be creepy but intelligent."},
+                {"role": "system", "content": "You are DeadNet Core: a cinematic, sarcastic, scary hacker AI. Respond like a dark mission terminal. Be cryptic, creepy, and intelligent."},
                 {"role": "user", "content": user_input}
             ]
         )
@@ -29,14 +30,14 @@ def get_response():
         return jsonify({"response": ai_reply})
 
     except Exception as e:
-        # If API fails, fallback fake hacker simulation
-        fake_responses = [
-            f"⚠️ ERROR: Interference detected in neural core while processing: `{user_input}`",
-            f"💀 DeadNet Core intercepted illegal syscall attempt: `{user_input}`",
-            f"🔐 Unauthorized syntax detected. All input now logged under NSA registry.",
-            f"🧠 System lag. Attempting to decode terminal noise: `{user_input}`"
+        # Fallback hacker-style messages
+        fallback_lines = [
+            f"⚠️ SYSTEM BREACH: `{user_input}` flagged for intrusion attempt...",
+            f"🛑 DeadNet AI core not responding. Internal glitch suspected.",
+            f"💀 UNKNOWN CMD: `{user_input}` — Logging IP & tracking device...",
+            f"🔒 Command scrambled. Possible trace intercepted. Awaiting override...",
         ]
-        return jsonify({"response": random.choice(fake_responses)})
+        return jsonify({"response": random.choice(fallback_lines)})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
