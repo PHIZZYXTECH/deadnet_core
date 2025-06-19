@@ -1,80 +1,42 @@
 from flask import Flask, render_template, request, jsonify
-import requests
-import subprocess
-import datetime
-import os
 import openai
-import shutil
+import os
+import random
 
 app = Flask(__name__)
 
-# Set up OpenAI
+# Set your OpenAI key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Log visitor info
-def log_visitor(ip, location, command=None):
-    log = f"{datetime.datetime.now()} - IP: {ip} | Location: {location} | Command: {command}\n"
-    with open("visitor_logs.txt", "a") as f:
-        f.write(log)
-
-# Get visitor IP + Geo info
-def get_geo():
-    try:
-        res = requests.get("https://ipapi.co/json/").json()
-        return {
-            "ip": res.get("ip", "Unknown"),
-            "city": res.get("city", "Unknown"),
-            "region": res.get("region", ""),
-            "country": res.get("country_name", ""),
-            "lat": res.get("latitude", "0"),
-            "lon": res.get("longitude", "0")
-        }
-    except:
-        return {
-            "ip": "Unknown",
-            "city": "Unknown",
-            "region": "",
-            "country": "",
-            "lat": "0",
-            "lon": "0"
-        }
-
-@app.route("/")
+@app.route('/')
 def index():
-    geo = get_geo()
-    log_visitor(geo['ip'], f"{geo['city']}, {geo['country']}")
-    return render_template("index.html", geo=geo)
+    return render_template('index.html')
 
-@app.route("/command", methods=["POST"])
-def command():
-    user_input = request.json.get("command")
-    geo = get_geo()
-    log_visitor(geo['ip'], f"{geo['city']}, {geo['country']}", user_input)
+@app.route('/get_response', methods=['POST'])
+def get_response():
+    user_input = request.json.get('user_input')
 
-    if "storymode" in user_input.lower():
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are DeadNet Core AI: respond like a dark, cryptic hacker overlord. Give cinematic, slightly funny, mission-style responses with cyberpunk flair."},
-                    {"role": "user", "content": "Engage storymode."}
-                ]
-            )
-            return jsonify({"response": response["choices"][0]["message"]["content"]})
-        except Exception as e:
-            return jsonify({"response": f"⚠️ OpenAI Error: {str(e)}"})
+    try:
+        # AI responds to every command
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are DeadNet Core: a scary, cinematic hacker AI with a sarcastic edge. Respond to all input with mystery, dark energy, and hacker-like warnings or briefings. Be creepy but intelligent."},
+                {"role": "user", "content": user_input}
+            ]
+        )
+        ai_reply = response["choices"][0]["message"]["content"]
+        return jsonify({"response": ai_reply})
 
-    # Generic simulated hacker response
-    response = f"""
-🧠 Terminal > '{user_input}'
-⚙️ Executing dark protocol...
-📍 Location trace: {geo['city']}, {geo['country']} ({geo['ip']})
-🛰️ Signal rerouted via encrypted satellite node.
-🔓 Digital fingerprint stored and archived.
+    except Exception as e:
+        # If API fails, fallback fake hacker simulation
+        fake_responses = [
+            f"⚠️ ERROR: Interference detected in neural core while processing: `{user_input}`",
+            f"💀 DeadNet Core intercepted illegal syscall attempt: `{user_input}`",
+            f"🔐 Unauthorized syntax detected. All input now logged under NSA registry.",
+            f"🧠 System lag. Attempting to decode terminal noise: `{user_input}`"
+        ]
+        return jsonify({"response": random.choice(fake_responses)})
 
-⚡ Hint: Type 'run storymode' to access the AI core.
-"""
-    return jsonify({"response": response})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
